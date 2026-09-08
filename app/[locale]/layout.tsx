@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { dict } from "@/content/dictionary";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
-import { site } from "@/lib/site";
+import { noindex, site } from "@/lib/site";
 import "../globals.css";
 
 const display = Instrument_Serif({
@@ -67,7 +67,7 @@ export async function generateMetadata({
       description,
       url: `/${l}`,
     },
-    robots: { index: true, follow: true },
+    robots: { index: !noindex, follow: !noindex },
   };
 }
 

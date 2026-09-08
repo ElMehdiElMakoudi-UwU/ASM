@@ -46,6 +46,13 @@ export const site = {
   gold: "#D3A83B",
 } as const;
 
+/**
+ * Set NEXT_PUBLIC_SITE_NOINDEX=true on the Coolify preview so search engines
+ * leave it alone. Remove it (or set false) on the real domain at launch.
+ * It is read at build time, so a change needs a redeploy.
+ */
+export const noindex = process.env.NEXT_PUBLIC_SITE_NOINDEX === "true";
+
 export function whatsappLink(message: string) {
   return `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`;
 }

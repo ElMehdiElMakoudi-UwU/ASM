@@ -7,9 +7,14 @@ Bilingual (FR/EN) website for an architecture studio in Tanger, Morocco.
 ```bash
 npm install
 npm run dev      # http://localhost:3000
-npm run build    # production build
-npm start        # serve the production build
+npm run build    # production build, output in .next-build
+npm start        # serve that build
 ```
+
+`next dev` writes to `.next` and `next build` writes to `.next-build`, so a
+build never deletes the chunks a running dev server is serving. Do not run two
+dev servers against this directory at once — they share `.next` and will
+overwrite each other, which surfaces as `ChunkLoadError` in the browser.
 
 ## What is where
 
@@ -140,12 +145,51 @@ values must be set on the host.
 
 WhatsApp and email need no configuration; they read from `lib/site.ts`.
 
-## Deploying
+## Deploying to Coolify
 
-Built for Vercel: import the repository, add the environment variables above,
-and point the domain at it. Every page except the contact endpoint is
-pre-rendered as static HTML, so any Node host that runs `next build` and
-`next start` works too.
+The repository ships a `Dockerfile` using Next.js standalone output. In Coolify:
+
+1. **New Resource → Application**, connect this repository, branch `main`.
+2. **Build Pack: Dockerfile** (not Nixpacks). Dockerfile path `./Dockerfile`.
+3. **Port: 3000**.
+4. **Health check path: `/api/health`.** Do not leave it on `/` — that redirects
+   to a locale with a 307 and can be read as unhealthy.
+5. **Build Variables** — these are baked in at build time, so they must be set
+   as build variables, not only runtime environment variables:
+
+   | Variable | Value |
+   | --- | --- |
+   | `NEXT_PUBLIC_SITE_URL` | the URL this deployment answers on |
+   | `NEXT_PUBLIC_SITE_NOINDEX` | `true` while it is a client preview |
+
+6. **Runtime environment variables** for the contact form:
+   `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`. Without them the form is
+   refused rather than silently dropping an enquiry — WhatsApp and the email
+   link keep working regardless.
+7. Attach the domain and let Coolify issue the certificate.
+
+### Sending it to the client for a first look
+
+Set `NEXT_PUBLIC_SITE_NOINDEX=true` and `NEXT_PUBLIC_SITE_URL` to the preview
+URL Coolify gives you. That makes `robots.txt` return `Disallow: /` and puts
+`noindex` on every page, so an unfinished site with placeholder years does not
+get picked up by Google under the architect's name. Coolify can also put basic
+auth in front of the whole application if you would rather it were not public
+at all. Remove the flag and redeploy at launch.
+
+### Local checks before deploying
+
+```bash
+npm run build     # writes to .next-build, so a running dev server is unaffected
+npm start         # serves that build
+```
+
+A local Docker run, matching the container exactly:
+
+```bash
+docker build --build-arg NEXT_PUBLIC_SITE_URL=http://localhost:3000 -t asm .
+docker run --rm -p 3000:3000 asm
+```
 
 ## Details worth knowing
 
