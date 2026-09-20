@@ -108,6 +108,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      suppressHydrationWarning
     >
       <head>
         {/* Without scripting the reveal observer never runs, so the content
@@ -115,13 +116,13 @@ export default async function LocaleLayout({
         <noscript>
           <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
         </noscript>
-        {/* Runs before the header paints: hides the real logo for the same
-            first-visit case where SiteLoader is about to run its threshold
-            splash, so its animated stand-in is never doubled up with the
+        {/* Runs before the header paints: hides the real logo whenever
+            SiteLoader is about to run its threshold splash (every full page
+            load), so its animated stand-in is never doubled up with the
             real one underneath. Mirrors SiteLoader's own gate exactly. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(!sessionStorage.getItem("asm-threshold")&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("data-intro-active","")}}catch(e){}`,
+            __html: `try{if(!window.matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("data-intro-active","")}}catch(e){}`,
           }}
         />
       </head>

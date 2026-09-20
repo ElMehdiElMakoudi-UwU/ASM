@@ -21,6 +21,7 @@
   --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", monospace;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-quint: cubic-bezier(0.64, 0, 0.78, 0);
 }
 
 @layer base {
@@ -296,45 +297,7 @@
     visibility: hidden;
   }
 
-  /* ---- Threshold (loader / page-transition) ------------------------ */
-
-  .threshold-leaf {
-    position: fixed;
-    inset: 0 auto 0 auto;
-    top: 0;
-    bottom: 0;
-    width: 50%;
-    background: var(--color-ink);
-  }
-
-  .threshold-leaf-l {
-    left: 0;
-  }
-
-  .threshold-leaf-r {
-    right: 0;
-  }
-
-  .threshold-mark {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.85rem;
-  }
-
-  .threshold-portal {
-    width: 56px;
-    height: auto;
-  }
-
-  .threshold-portal path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-  }
+  /* ---- Threshold (first-load splash) -------------------------------- */
 
   .threshold-splash {
     position: fixed;
@@ -378,7 +341,7 @@
 
   .threshold-lockup-mark {
     position: fixed;
-    top: calc(50% - 0.9rem);
+    top: calc(50% - 1.3rem);
     left: 50%;
     transform-origin: top left;
     transform: translate(-50%, -100%) scale(0.94);
@@ -394,8 +357,8 @@
   }
 
   /* Corner position + size matches the real header logo exactly (measured:
-     22px cap height vs. the splash's 30px, hence the 22/30 scale), so the
-     handoff at idle is an invisible swap rather than a jump in size. */
+     22px cap height vs. the splash's 60px intro size, hence the 22/60
+     scale), so the handoff at idle is an invisible swap, not a jump. */
   .threshold-lockup-mark[data-stage="toCorner"],
   .threshold-lockup-mark[data-stage="settle"],
   .threshold-lockup-mark[data-stage="reveal"] {
@@ -408,7 +371,7 @@
     opacity: 1;
     top: 25px;
     left: 20px;
-    transform: scale(0.7333);
+    transform: scale(0.36667);
   }
 
   @media (min-width: 768px) {
@@ -431,7 +394,7 @@
   .threshold-wordmark {
     display: inline-flex;
     align-items: baseline;
-    font-size: 1.875rem;
+    font-size: 3.75rem;
     line-height: 1;
     white-space: nowrap;
   }
@@ -469,7 +432,7 @@
 
   .threshold-lockup-name {
     position: fixed;
-    top: calc(50% + 0.9rem);
+    top: calc(50% + 1.3rem);
     left: 50%;
     transform: translate(-50%, 0);
     font-family: var(--font-mono);
@@ -525,25 +488,26 @@
 
   .threshold-underline {
     position: absolute;
-    left: 0;
+    left: 50%;
     top: 100%;
     display: block;
     overflow: hidden;
     margin-top: 0.7em;
+    margin-left: -50vw;
     height: 2px;
-    width: 100%;
+    width: 100vw;
     border-radius: 2px;
     transform: scaleX(0);
-    transform-origin: left center;
+    transform-origin: center;
     background: var(--color-gold);
     box-shadow: 0 0 10px rgba(211, 168, 59, 0.4);
     opacity: 1;
-    animation: threshold-underline-draw 0.5s var(--ease-out-quint) 0.55s
-      forwards;
+    animation:
+      threshold-underline-draw 0.5s var(--ease-out-quint) 0.55s forwards,
+      threshold-underline-close 0.3s var(--ease-in-quint) 1.05s forwards;
     transition: opacity 0.25s var(--ease-out-quint);
   }
 
-  .threshold-lockup-mark[data-stage="toCorner"] .threshold-underline,
   .threshold-lockup-mark[data-stage="settle"] .threshold-underline,
   .threshold-lockup-mark[data-stage="reveal"] .threshold-underline {
     opacity: 0;
@@ -638,6 +602,15 @@
     }
   }
 
+  @keyframes threshold-underline-close {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
+
   @keyframes threshold-underline-sweep {
     from {
       transform: translateX(-120%);
@@ -645,61 +618,6 @@
     to {
       transform: translateX(220%);
     }
-  }
-
-  @keyframes threshold-leaf-l-transit {
-    0% {
-      transform: translateX(-100%);
-    }
-    42%,
-    58% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-
-  @keyframes threshold-leaf-r-transit {
-    0% {
-      transform: translateX(100%);
-    }
-    42%,
-    58% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-
-  @keyframes threshold-mark-transit {
-    0%,
-    100% {
-      opacity: 0;
-      transform: scale(0.9);
-    }
-    35%,
-    65% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  [data-phase="transit"] .threshold-leaf-l {
-    animation: threshold-leaf-l-transit 0.62s ease-in-out forwards;
-  }
-
-  [data-phase="transit"] .threshold-leaf-r {
-    animation: threshold-leaf-r-transit 0.62s ease-in-out forwards;
-  }
-
-  [data-phase="transit"] .threshold-mark {
-    animation: threshold-mark-transit 0.62s ease-in-out forwards;
-  }
-
-  [data-phase="transit"] .threshold-portal path {
-    stroke-dashoffset: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {

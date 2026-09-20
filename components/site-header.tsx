@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
+import { LOGO_INTRO_EVENT } from "@/components/site-loader";
 import { dict } from "@/content/dictionary";
 import { locales, switchLocalePath, type Locale } from "@/lib/i18n";
 import type { SiteSettings } from "@/lib/db/settings";
@@ -73,6 +74,14 @@ export function SiteHeader({
           href={`/${locale}`}
           className="group flex items-baseline"
           aria-label={`${site.fullName} — ${dict.common.backHome[locale]}`}
+          onClick={() => {
+            // From another page, clicking the logo replays the full
+            // threshold splash (SiteLoader listens for this) instead of
+            // the quick door-leaf cut every other in-app link gets.
+            if (!isHome) {
+              window.dispatchEvent(new Event(LOGO_INTRO_EVENT));
+            }
+          }}
         >
           {/* Hidden by the inline script in <head> while the first-visit
               threshold splash is running, so its own animated stand-in is
