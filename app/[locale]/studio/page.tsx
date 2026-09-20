@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Frame } from "@/components/frame";
 import { Reveal } from "@/components/reveal";
 import { dict, figures, principles } from "@/content/dictionary";
+import { getSettings } from "@/lib/data";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
-import { site } from "@/lib/site";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -35,6 +35,7 @@ export default async function StudioPage({
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
   const s = dict.studio;
+  const site = await getSettings();
 
   return (
     <>
@@ -50,7 +51,7 @@ export default async function StudioPage({
       <section className="shell grid gap-12 md:grid-cols-12">
         <Reveal className="md:col-span-5">
           <Frame
-            src="/souhail-mharrech.jpg"
+            src={site.portrait}
             alt={site.founder}
             seed="souhail-mharrech-portrait"
             className="aspect-[4/5]"
@@ -62,7 +63,7 @@ export default async function StudioPage({
         </Reveal>
 
         <Reveal className="prose-asm self-center md:col-span-6 md:col-start-7" delay={90}>
-          {s.bio[locale].map((paragraph, i) => (
+          {site.bio[locale].map((paragraph, i) => (
             <p key={i}>{paragraph}</p>
           ))}
         </Reveal>

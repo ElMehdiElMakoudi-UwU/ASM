@@ -20,9 +20,9 @@ overwrite each other, which surfaces as `ChunkLoadError` in the browser.
 
 | Path | What it holds |
 | --- | --- |
-| `lib/site.ts` | Address, phone, WhatsApp, email, social links, registration number. **Start here.** |
-| `content/projects.ts` | Every project — text, facts, gallery captions, image paths. |
-| `content/dictionary.ts` | All interface copy in both languages, plus the service lines, the five commission stages, the working rules and the figures. |
+| `content/projects.ts` | The **seed** copy of every project — text, facts, gallery captions, image paths. Loaded into the database once, on first boot; editing it after that has no effect on the live site (edit through `/admin` instead). |
+| `lib/site.ts` | The **seed** copy of the studio's practice details — address, phone, WhatsApp, email, social links, registration number. Same caveat: `/admin` owns it after first boot. |
+| `content/dictionary.ts` | All interface copy in both languages — nav labels, service descriptions, form strings — plus the service lines, the five commission stages, the working rules and the figures. This one is still static code; only projects and the studio bio/contact details moved to the database. |
 | `app/globals.css` | The whole design system: colours, type roles, spacing, motion. |
 | `components/placeholder.tsx` | The stand-in artwork used until real photography arrives. |
 | `components/logo.tsx` | The wordmark. Reads the real vector once it is supplied. |
@@ -60,23 +60,50 @@ evidenced.
 
 ### Adding more photography
 
-Drop the files into `public/projects/`, then set the paths:
+The client adds photography himself, through `/admin` — see **The
+backoffice** below. Upload there re-encodes the file, strips metadata and
+caps it at 3000px on the long edge, so there is no manual prep step. A
+project with no cover set falls back to a generated study, so the site never
+shows an empty box. `shape: "wide"` spans the full width; `"tall"` sits in a
+half column. Avoid sources wider than about 2:1 for gallery slots; they crop
+heavily in a 16:9 frame.
 
-```ts
-cover: "/projects/malabata-cover.jpg",
-gallery: [
-  { src: "/projects/malabata-01.jpg", shape: "wide", caption: { fr: "…", en: "…" } },
-],
+The home page shows the projects flagged "featured", in their current
+display order.
+
+## The backoffice
+
+`/admin` is a password-protected area where the client can add, edit,
+reorder and delete projects, and edit the studio's practice details (address,
+phone, WhatsApp, email, socials, registration number) and bio — without a
+developer and without a redeploy. It is a separate, unlocalised tool (no
+`/fr`/`/en` prefix) and is excluded from search indexing regardless of the
+`NEXT_PUBLIC_SITE_NOINDEX` flag.
+
+**How it works.** Content that used to be hardcoded in `content/projects.ts`
+and `lib/site.ts` now lives in a SQLite database (`lib/db/`). On first boot,
+if that database is empty, it is seeded from those two files, so nothing in
+the existing portfolio is lost — after that, those files are just historical
+seed copy and are no longer read by the live site. Public pages read through
+a cached layer (`lib/data.ts`) tagged `"projects"` / `"settings"`; every
+admin edit calls `revalidateTag`, so changes appear on the live site within
+the same request, with no rebuild.
+
+**Setting it up.** Set two env vars before deploying:
+
+```
+ADMIN_PASSWORD=…             # the password the client logs in with
+ADMIN_SESSION_SECRET=…       # a long random string, signs the login session
 ```
 
-Any project set back to `null` falls back to a generated study, so the site
-never shows an empty box. `shape: "wide"` spans the full width; `"tall"` sits in
-a half column. Supply images at roughly 2400px on the long edge — Next.js
-generates the smaller sizes and serves AVIF/WebP. Avoid sources wider than about
-2:1 for gallery slots; they crop heavily in a 16:9 frame.
+Generate a secret with `openssl rand -hex 32`. Optionally set
+`DATABASE_PATH` to change where the SQLite file is written (default
+`./data/asm.db`).
 
-The home page shows the projects flagged `featured: true`, in the order they
-appear in the file.
+**Persistence.** The database file and any uploaded photos
+(`public/uploads/`) must survive redeploys — see the volumes note in
+**Deploying to Coolify** below. Back up by copying the SQLite file; it is a
+single file at `DATABASE_PATH`.
 
 ## The logo
 
@@ -166,7 +193,21 @@ The repository ships a `Dockerfile` using Next.js standalone output. In Coolify:
    `RESEND_API_KEY`, `CONTACT_TO`, `CONTACT_FROM`. Without them the form is
    refused rather than silently dropping an enquiry — WhatsApp and the email
    link keep working regardless.
-7. Attach the domain and let Coolify issue the certificate.
+7. **Runtime environment variables** for the backoffice: `ADMIN_PASSWORD` and
+   `ADMIN_SESSION_SECRET` (see **The backoffice** above). `/admin` is unusable
+   without them — every login attempt fails closed.
+8. **Persistent volumes — required, not optional.** Mount two Coolify
+   volumes:
+
+   | Container path | Holds |
+   | --- | --- |
+   | `/app/data` | The SQLite database (projects, studio info) |
+   | `/app/public/uploads` | Photos uploaded through `/admin` |
+
+   Without these, every redeploy resets the site to the seed content and
+   deletes every photo the client uploaded. A single volume mounted at
+   `/app` would also work, but covers more than it needs to.
+9. Attach the domain and let Coolify issue the certificate.
 
 ### Sending it to the client for a first look
 

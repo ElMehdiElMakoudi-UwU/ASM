@@ -6,9 +6,15 @@ import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
 import { dict } from "@/content/dictionary";
 import { locales, switchLocalePath, type Locale } from "@/lib/i18n";
-import { site } from "@/lib/site";
+import type { SiteSettings } from "@/lib/db/settings";
 
-export function SiteHeader({ locale }: { locale: Locale }) {
+export function SiteHeader({
+  locale,
+  settings: site,
+}: {
+  locale: Locale;
+  settings: SiteSettings;
+}) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,15 +71,20 @@ export function SiteHeader({ locale }: { locale: Locale }) {
       <div className="shell relative flex h-[4.5rem] items-center justify-between gap-6 md:h-20">
         <Link
           href={`/${locale}`}
-          className="group flex items-baseline gap-3"
+          className="group flex items-baseline"
           aria-label={`${site.fullName} — ${dict.common.backHome[locale]}`}
         >
-          <Logo height={22} onDark={overlay} />
-          <span
-            className="hidden text-[0.625rem] uppercase tracking-[0.22em] opacity-70 sm:inline"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            {site.fullName}
+          {/* Hidden by the inline script in <head> while the first-visit
+              threshold splash is running, so its own animated stand-in is
+              the only "logo" on screen until it hands off here. */}
+          <span data-logo-content className="flex items-baseline gap-3">
+            <Logo height={22} onDark={overlay} />
+            <span
+              className="hidden text-[0.625rem] uppercase tracking-[0.22em] opacity-70 sm:inline"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {site.fullName}
+            </span>
           </span>
         </Link>
 

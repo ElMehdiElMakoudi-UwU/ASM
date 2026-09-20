@@ -5,8 +5,8 @@ import { useMemo, useState } from "react";
 import { Frame } from "@/components/frame";
 import { dict } from "@/content/dictionary";
 import {
+  categories,
   categoryLabels,
-  usedCategories,
   type Category,
   type Project,
 } from "@/content/projects";
@@ -25,6 +25,11 @@ export function ProjectRegister({
 }) {
   const [filter, setFilter] = useState<Category | "all">("all");
   const [activeSlug, setActiveSlug] = useState(projects[0]?.slug ?? "");
+
+  const usedCategories = useMemo(
+    () => categories.filter((cat) => projects.some((p) => p.category === cat)),
+    [projects],
+  );
 
   const shown = useMemo(
     () => (filter === "all" ? projects : projects.filter((p) => p.category === filter)),

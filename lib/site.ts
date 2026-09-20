@@ -53,6 +53,6 @@ export const site = {
  */
 export const noindex = process.env.NEXT_PUBLIC_SITE_NOINDEX === "true";
 
-export function whatsappLink(message: string) {
-  return `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(message)}`;
+export function whatsappLink(message: string, whatsappNumber: string = site.whatsappNumber) {
+  return `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 }

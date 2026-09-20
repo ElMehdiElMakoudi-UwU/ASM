@@ -3,9 +3,11 @@ import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SiteLoader } from "@/components/site-loader";
 import { dict } from "@/content/dictionary";
+import { getSettings } from "@/lib/data";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
-import { noindex, site } from "@/lib/site";
+import { noindex, site as siteDefaults } from "@/lib/site";
 import "../globals.css";
 
 const display = Instrument_Serif({
@@ -29,7 +31,7 @@ const mono = IBM_Plex_Mono({
   display: "swap",
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? site.url;
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? siteDefaults.url;
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -42,6 +44,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const l: Locale = isLocale(locale) ? locale : "fr";
+  const site = await getSettings();
 
   const description =
     l === "fr"
@@ -80,6 +83,7 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   if (!isLocale(locale)) notFound();
+  const site = await getSettings();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -111,6 +115,15 @@ export default async function LocaleLayout({
         <noscript>
           <style>{`.reveal{opacity:1!important;transform:none!important}`}</style>
         </noscript>
+        {/* Runs before the header paints: hides the real logo for the same
+            first-visit case where SiteLoader is about to run its threshold
+            splash, so its animated stand-in is never doubled up with the
+            real one underneath. Mirrors SiteLoader's own gate exactly. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(!sessionStorage.getItem("asm-threshold")&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("data-intro-active","")}}catch(e){}`,
+          }}
+        />
       </head>
       <body className="min-h-dvh antialiased">
         <a
@@ -119,9 +132,10 @@ export default async function LocaleLayout({
         >
           {dict.common.skipToContent[locale]}
         </a>
-        <SiteHeader locale={locale} />
+        <SiteLoader />
+        <SiteHeader locale={locale} settings={site} />
         <main id="main">{children}</main>
-        <SiteFooter locale={locale} />
+        <SiteFooter locale={locale} settings={site} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

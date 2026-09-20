@@ -2,9 +2,15 @@ import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { dict } from "@/content/dictionary";
 import type { Locale } from "@/lib/i18n";
-import { site } from "@/lib/site";
+import type { SiteSettings } from "@/lib/db/settings";
 
-export function SiteFooter({ locale }: { locale: Locale }) {
+export function SiteFooter({
+  locale,
+  settings: site,
+}: {
+  locale: Locale;
+  settings: SiteSettings;
+}) {
   const year = new Date().getFullYear();
 
   const links = [

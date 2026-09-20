@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
 import { dict } from "@/content/dictionary";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
-import { site, whatsappLink } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
+import { getSettings } from "@/lib/data";
 
 export async function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -33,6 +34,7 @@ export default async function ContactPage({
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
   const c = dict.contact;
+  const site = await getSettings();
 
   return (
     <section className="shell pb-28 pt-36 md:pt-44">
@@ -53,7 +55,7 @@ export default async function ContactPage({
 
         <aside className="md:col-span-4 md:col-start-9">
           <a
-            href={whatsappLink(c.whatsappPrefill[locale])}
+            href={whatsappLink(c.whatsappPrefill[locale], site.whatsappNumber)}
             target="_blank"
             rel="noreferrer noopener"
             className="btn btn-ink w-full justify-center"

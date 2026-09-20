@@ -2,9 +2,10 @@ import Link from "next/link";
 import { Frame } from "@/components/frame";
 import { Reveal } from "@/components/reveal";
 import { dict, services } from "@/content/dictionary";
-import { categoryLabels, featuredProjects } from "@/content/projects";
+import { categoryLabels } from "@/content/projects";
+import type { Project } from "@/content/projects";
+import { getFeaturedProjects, getSettings } from "@/lib/data";
 import { isLocale, type Locale } from "@/lib/i18n";
-import { site } from "@/lib/site";
 
 export default async function HomePage({
   params,
@@ -14,6 +15,10 @@ export default async function HomePage({
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
   const h = dict.home;
+  const [site, featuredProjects] = await Promise.all([
+    getSettings(),
+    getFeaturedProjects(),
+  ]);
   const [first, second, third, fourth] = featuredProjects;
 
   return (
@@ -29,7 +34,7 @@ export default async function HomePage({
             alt=""
             seed="lumiere-tanger"
             className="h-full w-full"
-            imageClassName="settle"
+            imageClassName="kenburns"
             sizes="100vw"
             priority
           />
@@ -199,7 +204,7 @@ function ProjectTile({
   sizes,
   wideMeta = false,
 }: {
-  project: (typeof featuredProjects)[number];
+  project: Project;
   locale: Locale;
   ratio: string;
   sizes: string;

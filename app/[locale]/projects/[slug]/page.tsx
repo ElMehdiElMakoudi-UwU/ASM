@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { Frame } from "@/components/frame";
 import { Reveal } from "@/components/reveal";
 import { dict } from "@/content/dictionary";
-import { categoryLabels, getProject, projects } from "@/content/projects";
+import { categoryLabels } from "@/content/projects";
+import { getProject, listProjects } from "@/lib/data";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
 
 export async function generateStaticParams() {
+  const projects = await listProjects();
   return locales.flatMap((locale) =>
     projects.map((project) => ({ locale, slug: project.slug })),
   );
@@ -20,7 +22,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const l: Locale = isLocale(locale) ? locale : "fr";
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) return {};
 
   return {
@@ -45,7 +47,7 @@ export default async function ProjectPage({
 }) {
   const { locale: raw, slug } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
-  const project = getProject(slug);
+  const [project, projects] = await Promise.all([getProject(slug), listProjects()]);
   if (!project) notFound();
 
   const index = projects.findIndex((p) => p.slug === slug);

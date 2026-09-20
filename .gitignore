@@ -12,3 +12,8 @@ npm-debug.log*
 .vercel
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# Backoffice: the local SQLite database and photos uploaded through /admin.
+# In production these live on Coolify persistent volumes, not in git.
+/data
+/public/uploads

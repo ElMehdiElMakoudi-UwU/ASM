@@ -9,6 +9,10 @@ RUN apk add --no-cache libc6-compat
 # ---- dependencies -----------------------------------------------------------
 FROM base AS deps
 WORKDIR /app
+# better-sqlite3 (the backoffice's database) ships prebuilt binaries for most
+# platforms, but falls back to compiling from source when none matches —
+# these are that fallback's build toolchain.
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -44,6 +48,11 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# The backoffice's SQLite file and uploaded photos live here — mount Coolify
+# persistent volumes at these two paths, or every redeploy wipes them.
+RUN mkdir -p /app/data /app/public/uploads \
+ && chown -R nextjs:nodejs /app/data /app/public/uploads
 
 USER nextjs
 EXPOSE 3000

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ProjectRegister } from "@/components/project-register";
 import { dict } from "@/content/dictionary";
-import { projects } from "@/content/projects";
+import { listProjects } from "@/lib/data";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
 
 export async function generateStaticParams() {
@@ -32,6 +32,7 @@ export default async function ProjectsPage({
 }) {
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
+  const projects = await listProjects();
 
   return (
     <section className="shell pb-28 pt-36 md:pt-44">
