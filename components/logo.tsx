@@ -1,3 +1,4 @@
+import { AsmMark } from "@/components/asm-mark";
 import { site } from "@/lib/site";
 
 /**
@@ -7,9 +8,9 @@ import { site } from "@/lib/site";
  * `site.hasLogoAsset` and this renders the real artwork — the light variant on
  * dark bands, the dark variant on paper.
  *
- * Until then it draws a stand-in: "AS" in the grotesque, followed by the
- * portal — the M of the mark, which IS exact, being three rectangles. The
- * letterforms are an approximation and are meant to be replaced.
+ * Until then it draws the geometric mark from AsmMark — roof, stair, portal —
+ * which is the same set of forms every animation on the site moves around.
+ * The portal is exact (three rectangles); the A and S are drawn to match it.
  */
 export function Logo({
   /** Cap height of the mark, in px. */
@@ -35,35 +36,11 @@ export function Logo({
   }
 
   return (
-    <span
+    <AsmMark
+      height={Math.round(height * 0.72)}
       className={className}
-      style={{ fontSize: height, lineHeight: 1, whiteSpace: "nowrap" }}
-      aria-hidden="true"
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontWeight: 600,
-          letterSpacing: "-0.035em",
-        }}
-      >
-        AS
-      </span>
-      <svg
-        viewBox="0 0 104 100"
-        style={{
-          // Preflight makes svg display:block; inline-block puts the portal
-          // back on the baseline, at the cap height of the letters.
-          display: "inline-block",
-          verticalAlign: "baseline",
-          height: "0.72em",
-          marginLeft: "0.06em",
-        }}
-        fill="var(--color-gold)"
-        role="presentation"
-      >
-        <path d="M0 0H104V100H82V22H22V100H0Z" />
-      </svg>
-    </span>
+      style={{ display: "inline-block", verticalAlign: "baseline" }}
+      data-logo-mark
+    />
   );
 }

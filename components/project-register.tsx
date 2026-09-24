@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Frame } from "@/components/frame";
+import { doorway } from "@/components/form-scenes";
 import { dict } from "@/content/dictionary";
 import {
   categories,
@@ -10,6 +11,7 @@ import {
   type Category,
   type Project,
 } from "@/content/projects";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import type { Locale } from "@/lib/i18n";
 
 /**
@@ -37,6 +39,26 @@ export function ProjectRegister({
   );
 
   const active = shown.find((p) => p.slug === activeSlug) ?? shown[0];
+  const wellRef = useRef<HTMLDivElement>(null);
+
+  // Each newly previewed project comes in through the portal: its image
+  // opens from the portal's doorway to the full well.
+  useEffect(() => {
+    const well = wellRef.current;
+    if (!well || !active || prefersReducedMotion()) return;
+    const layer = well.querySelector<HTMLElement>(
+      `[data-preview="${CSS.escape(active.slug)}"]`,
+    );
+    if (!layer) return;
+    const tween = gsap.fromTo(
+      layer,
+      { clipPath: doorway(well.offsetWidth, well.offsetHeight) },
+      { clipPath: "inset(0px 0px 0px 0px)", duration: 0.9, ease: "expo.out" },
+    );
+    return () => {
+      tween.kill();
+    };
+  }, [active]);
 
   function applyFilter(next: Category | "all") {
     setFilter(next);
@@ -157,12 +179,20 @@ export function ProjectRegister({
           {/* Preview well */}
           <div className="hidden lg:col-span-4 lg:block">
             <div className="sticky top-32">
-              <div className="relative aspect-[3/4] overflow-hidden bg-paper-dim">
+              <div
+                ref={wellRef}
+                className="relative aspect-[3/4] overflow-hidden bg-paper-dim"
+              >
                 {shown.map((project) => (
                   <div
                     key={project.slug}
+                    data-preview={project.slug}
                     className="absolute inset-0 transition-opacity duration-700"
-                    style={{ opacity: active?.slug === project.slug ? 1 : 0 }}
+                    style={{
+                      opacity: active?.slug === project.slug ? 1 : 0,
+                      // The incoming image opens over the outgoing one.
+                      zIndex: active?.slug === project.slug ? 1 : 0,
+                    }}
                     aria-hidden={active?.slug !== project.slug}
                   >
                     <Frame

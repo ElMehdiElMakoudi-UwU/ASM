@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Frame } from "@/components/frame";
+import { FormDrop, PortalReveal, StageBuild, ThresholdPass } from "@/components/form-scenes";
 import { Reveal } from "@/components/reveal";
 import { dict, processStages, services } from "@/content/dictionary";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
@@ -34,6 +35,10 @@ export default async function ServicesPage({
   const { locale: raw } = await params;
   const locale: Locale = isLocale(raw) ? raw : "fr";
   const s = dict.services;
+  // Each line of work carries one of the mark's forms: the portal for
+  // buildings, the stair for circulation through a city, the roof for a
+  // building carried through to completion, the whole mark for the images.
+  const serviceForms = ["M", "S", "A", "ASM"] as const;
 
   return (
     <>
@@ -51,6 +56,7 @@ export default async function ServicesPage({
           <Reveal as="section" key={service.key} className="border-t border-rule">
             <div className="grid gap-8 py-14 md:grid-cols-12 md:py-20">
               <div className="md:col-span-4">
+                <FormDrop form={serviceForms[i % serviceForms.length]} className="mb-8" />
                 <h2 className="display display-md">{service.title[locale]}</h2>
               </div>
 
@@ -73,13 +79,15 @@ export default async function ServicesPage({
             </div>
 
             {i === 1 && (
-              <Frame
-                src="/projects/le-stade-05.jpg"
-                alt=""
-                seed={`practice-${service.key}`}
-                className="mb-16 aspect-[21/9] w-full"
-                sizes="100vw"
-              />
+              <PortalReveal className="mb-16">
+                <Frame
+                  src="/projects/le-stade-05.jpg"
+                  alt=""
+                  seed={`practice-${service.key}`}
+                  className="aspect-[21/9] w-full"
+                  sizes="100vw"
+                />
+              </PortalReveal>
             )}
           </Reveal>
         ))}
@@ -89,13 +97,17 @@ export default async function ServicesPage({
       <section className="shell border-t border-rule py-24 md:py-32">
         <div className="grid gap-8 md:grid-cols-12">
           <div className="md:col-span-4">
-            <p className="label">{s.processLabel[locale]}</p>
-            <h2 className="display display-md mt-4 max-w-[12ch]">
-              {s.processTitle[locale]}
-            </h2>
-            <p className="mt-8 max-w-[36ch] text-[0.9375rem] leading-relaxed text-graphite">
-              {s.processNote[locale]}
-            </p>
+            {/* Sticky, so the house builds beside the stages as you read. */}
+            <div className="md:sticky md:top-32">
+              <p className="label">{s.processLabel[locale]}</p>
+              <h2 className="display display-md mt-4 max-w-[12ch]">
+                {s.processTitle[locale]}
+              </h2>
+              <p className="mt-8 max-w-[36ch] text-[0.9375rem] leading-relaxed text-graphite">
+                {s.processNote[locale]}
+              </p>
+              <StageBuild className="mt-12 hidden w-full max-w-[12rem] md:block" />
+            </div>
           </div>
 
           <ol className="md:col-span-7 md:col-start-6">
@@ -123,7 +135,7 @@ export default async function ServicesPage({
         </div>
       </section>
 
-      <section data-surface="dark" className="bg-ink text-paper">
+      <ThresholdPass>
         <div className="shell flex flex-col gap-10 py-20 md:flex-row md:items-end md:justify-between md:py-28">
           <h2 className="display display-lg max-w-[16ch]">
             {dict.home.ctaTitle[locale]}
@@ -133,7 +145,7 @@ export default async function ServicesPage({
             <span aria-hidden="true">→</span>
           </Link>
         </div>
-      </section>
+      </ThresholdPass>
     </>
   );
 }

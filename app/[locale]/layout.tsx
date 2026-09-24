@@ -3,6 +3,7 @@ import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { PageTransition } from "@/components/page-transition";
 import { SiteLoader } from "@/components/site-loader";
 import { dict } from "@/content/dictionary";
 import { getSettings } from "@/lib/data";
@@ -134,6 +135,7 @@ export default async function LocaleLayout({
           {dict.common.skipToContent[locale]}
         </a>
         <SiteLoader />
+        <PageTransition />
         <SiteHeader locale={locale} settings={site} />
         <main id="main">{children}</main>
         <SiteFooter locale={locale} settings={site} />

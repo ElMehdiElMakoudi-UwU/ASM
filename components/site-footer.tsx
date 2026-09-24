@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "@/components/logo";
+import { FooterMark } from "@/components/form-scenes";
 import { dict } from "@/content/dictionary";
 import type { Locale } from "@/lib/i18n";
 import type { SiteSettings } from "@/lib/db/settings";
@@ -25,7 +25,7 @@ export function SiteFooter({
       <div className="shell py-20 md:py-28">
         <div className="grid gap-14 md:grid-cols-12">
           <div className="md:col-span-5">
-            <Logo height={44} onDark />
+            <FooterMark />
             <p className="mt-5 text-[0.95rem] text-graphite-light">
               {site.fullName}
             </p>

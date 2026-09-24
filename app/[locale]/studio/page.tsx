@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Frame } from "@/components/frame";
+import {
+  FormRelay,
+  PortalReveal,
+  RelayForm,
+  RelayLockup,
+  ThresholdPass,
+} from "@/components/form-scenes";
 import { Reveal } from "@/components/reveal";
 import { dict, figures, principles } from "@/content/dictionary";
 import { getSettings } from "@/lib/data";
@@ -50,13 +57,15 @@ export default async function StudioPage({
 
       <section className="shell grid gap-12 md:grid-cols-12">
         <Reveal className="md:col-span-5">
-          <Frame
-            src={site.portrait}
-            alt={site.founder}
-            seed="souhail-mharrech-portrait"
-            className="aspect-[4/5]"
-            sizes="(min-width: 768px) 42vw, 100vw"
-          />
+          <PortalReveal on="load">
+            <Frame
+              src={site.portrait}
+              alt={site.founder}
+              seed="souhail-mharrech-portrait"
+              className="aspect-[4/5]"
+              sizes="(min-width: 768px) 42vw, 100vw"
+            />
+          </PortalReveal>
           <p className="label mt-4">
             {site.founder} — {s.founderRole[locale]}
           </p>
@@ -69,21 +78,30 @@ export default async function StudioPage({
         </Reveal>
       </section>
 
-      {/* Three rules held at once — a set, not a sequence. */}
+      {/* Three rules held at once — a set, not a sequence. The mark splits
+          so that each rule carries one of its three forms. */}
       <section className="shell mt-24 border-t border-rule py-16 md:mt-32 md:py-24">
-        <p className="label">{s.principlesLabel[locale]}</p>
-        <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-3">
-          {principles.map((principle, i) => (
-            <Reveal key={principle.title.fr} delay={i * 90}>
-              <h2 className="display display-md max-w-[10ch]">
-                {principle.title[locale]}
-              </h2>
-              <p className="mt-5 text-[0.9375rem] leading-relaxed text-graphite">
-                {principle.body[locale]}
-              </p>
-            </Reveal>
-          ))}
-        </div>
+        <FormRelay>
+          <p className="label flex items-center gap-4">
+            {s.principlesLabel[locale]}
+            <RelayLockup />
+          </p>
+          <div className="mt-12 grid gap-x-8 gap-y-12 md:grid-cols-3">
+            {principles.map((principle, i) => (
+              <div key={principle.title.fr}>
+                <RelayForm form={(["A", "S", "M"] as const)[i % 3]} />
+                <Reveal delay={i * 90} className="mt-8">
+                  <h2 className="display display-md max-w-[10ch]">
+                    {principle.title[locale]}
+                  </h2>
+                  <p className="mt-5 text-[0.9375rem] leading-relaxed text-graphite">
+                    {principle.body[locale]}
+                  </p>
+                </Reveal>
+              </div>
+            ))}
+          </div>
+        </FormRelay>
       </section>
 
       <section className="shell border-t border-rule py-16 md:py-20">
@@ -100,7 +118,7 @@ export default async function StudioPage({
         </dl>
       </section>
 
-      <section data-surface="dark" className="bg-ink text-paper">
+      <ThresholdPass>
         <div className="shell flex flex-col gap-10 py-20 md:flex-row md:items-end md:justify-between md:py-28">
           <h2 className="display display-lg max-w-[16ch]">
             {dict.home.ctaTitle[locale]}
@@ -110,7 +128,7 @@ export default async function StudioPage({
             <span aria-hidden="true">→</span>
           </Link>
         </div>
-      </section>
+      </ThresholdPass>
     </>
   );
 }

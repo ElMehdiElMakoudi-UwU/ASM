@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Frame } from "@/components/frame";
+import { PortalReveal } from "@/components/form-scenes";
 import { Reveal } from "@/components/reveal";
 import { dict } from "@/content/dictionary";
 import { categoryLabels } from "@/content/projects";
@@ -93,14 +94,17 @@ export default async function ProjectPage({
           </div>
 
           <div className="md:col-span-5 md:col-start-8">
-            <Frame
-              src={project.cover}
-              alt={project.title}
-              seed={project.slug}
-              className="aspect-[4/5] max-h-[60svh] border-x-2 border-t-2 border-gold"
-              sizes="(min-width: 768px) 42vw, 100vw"
-              priority
-            />
+            {/* The gold portal opens onto the cover as the page is uncovered. */}
+            <PortalReveal on="load">
+              <Frame
+                src={project.cover}
+                alt={project.title}
+                seed={project.slug}
+                className="aspect-[4/5] max-h-[60svh] border-x-2 border-t-2 border-gold"
+                sizes="(min-width: 768px) 42vw, 100vw"
+                priority
+              />
+            </PortalReveal>
           </div>
         </div>
       </header>
@@ -139,13 +143,15 @@ export default async function ProjectPage({
             delay={(i % 2) * 90}
           >
             <figure>
-              <Frame
-                src={item.src}
-                alt={item.caption[locale]}
-                seed={`${project.slug}-${i}`}
-                className={item.shape === "wide" ? "aspect-[16/9]" : "aspect-[4/5]"}
-                sizes={item.shape === "wide" ? "100vw" : "(min-width: 768px) 48vw, 100vw"}
-              />
+              <PortalReveal>
+                <Frame
+                  src={item.src}
+                  alt={item.caption[locale]}
+                  seed={`${project.slug}-${i}`}
+                  className={item.shape === "wide" ? "aspect-[16/9]" : "aspect-[4/5]"}
+                  sizes={item.shape === "wide" ? "100vw" : "(min-width: 768px) 48vw, 100vw"}
+                />
+              </PortalReveal>
               <figcaption className="label mt-4">{item.caption[locale]}</figcaption>
             </figure>
           </Reveal>

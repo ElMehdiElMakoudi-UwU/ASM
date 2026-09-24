@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact-form";
+import { FormDrop } from "@/components/form-scenes";
+import type { FormKey } from "@/components/asm-mark";
 import { dict } from "@/content/dictionary";
 import { isLocale, locales, type Locale } from "@/lib/i18n";
 import { whatsappLink } from "@/lib/site";
@@ -64,7 +66,7 @@ export default async function ContactPage({
           </a>
 
           <dl className="mt-12">
-            <ContactRow label={c.studioLabel[locale]}>
+            <ContactRow label={c.studioLabel[locale]} form="M">
               {site.street[locale] && (
                 <span className="block">{site.street[locale]}</span>
               )}
@@ -79,7 +81,7 @@ export default async function ContactPage({
               </a>
             </ContactRow>
 
-            <ContactRow label={c.phoneLabel[locale]}>
+            <ContactRow label={c.phoneLabel[locale]} form="S">
               <a href={`tel:${site.phoneHref}`} className="data link-underline block">
                 {site.phoneDisplay}
               </a>
@@ -88,13 +90,13 @@ export default async function ContactPage({
               </span>
             </ContactRow>
 
-            <ContactRow label={c.emailLabel[locale]}>
+            <ContactRow label={c.emailLabel[locale]} form="A">
               <a href={`mailto:${site.email}`} className="link-underline">
                 {site.email}
               </a>
             </ContactRow>
 
-            <ContactRow label={c.hoursLabel[locale]}>
+            <ContactRow label={c.hoursLabel[locale]} form="ASM">
               {c.hours[locale].map((line) => (
                 <span key={line} className="block">
                   {line}
@@ -110,14 +112,20 @@ export default async function ContactPage({
 
 function ContactRow({
   label,
+  form,
   children,
 }: {
   label: string;
+  /** The mark's form that drops onto this row. */
+  form: FormKey | "ASM";
   children: React.ReactNode;
 }) {
   return (
     <div className="border-t border-rule py-5">
-      <dt className="label">{label}</dt>
+      <dt className="label flex items-end justify-between gap-4">
+        {label}
+        <FormDrop form={form} height={16} />
+      </dt>
       <dd className="mt-3 text-[0.9375rem] leading-relaxed text-graphite">{children}</dd>
     </div>
   );

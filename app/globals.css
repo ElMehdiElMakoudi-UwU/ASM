@@ -297,327 +297,35 @@
     visibility: hidden;
   }
 
-  /* ---- Threshold (first-load splash) -------------------------------- */
+  /* ---- Threshold (the splash, see SiteLoader) ----------------------- */
 
-  .threshold-splash {
-    position: fixed;
-    inset: 0;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* Server-rendered so it covers the first paint, but only shown while the
+     intro is actually running — never without JS or with reduced motion. */
+  html:not([data-intro-active]) .asm-splash {
+    display: none;
   }
 
-  .threshold-bg {
-    position: absolute;
-    inset: 0;
-    z-index: -2;
-    background: var(--color-ink);
-    opacity: 1;
-    transition: opacity 0.4s var(--ease-out-quint);
+  /* The forms start hidden; GSAP scatters them, then brings them in. */
+  .asm-splash [data-form] {
+    visibility: hidden;
   }
 
-  .threshold-glow {
-    position: absolute;
-    z-index: -1;
-    width: 30rem;
-    height: 30rem;
-    border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      rgba(211, 168, 59, 0.22),
-      rgba(211, 168, 59, 0) 70%
-    );
-    filter: blur(6px);
-    opacity: 1;
-    animation: threshold-glow-pulse 2.4s ease-in-out infinite;
-    transition: opacity 0.4s var(--ease-out-quint);
+  /* The hero's entrance waits for the splash, or the page-transition
+     curtain, to lift. */
+  html[data-intro-active] .rise,
+  html[data-transitioning] .rise {
+    animation-play-state: paused;
   }
 
-  .threshold-splash[data-stage="reveal"] .threshold-bg,
-  .threshold-splash[data-stage="reveal"] .threshold-glow {
-    opacity: 0;
+  /* After the handoff the studio name fades in beside the landed mark. */
+  [data-logo-name] {
+    transition: opacity 0.5s var(--ease-out-quint);
   }
 
-  .threshold-lockup-mark {
-    position: fixed;
-    top: calc(50% - 1.3rem);
-    left: 50%;
-    transform-origin: top left;
-    transform: translate(-50%, -100%) scale(0.94);
-    color: var(--color-paper);
-    opacity: 0;
-    z-index: 2;
-    animation: threshold-mark-enter 0.5s var(--ease-out-quint) forwards;
-    transition:
-      top 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-      left 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-      color 0.3s var(--ease-out-quint);
-  }
-
-  /* Corner position + size matches the real header logo exactly (measured:
-     22px cap height vs. the splash's 60px intro size, hence the 22/60
-     scale), so the handoff at idle is an invisible swap, not a jump. */
-  .threshold-lockup-mark[data-stage="toCorner"],
-  .threshold-lockup-mark[data-stage="settle"],
-  .threshold-lockup-mark[data-stage="reveal"] {
-    /* Cancel the forwards-filled intro animation — otherwise it keeps
-       winning the cascade over opacity/transform forever and these rules
-       are silently ignored for those two properties. Restate opacity: 1
-       since the base rule's opacity: 0 (the animation's start value) would
-       otherwise win once the animation is gone. */
-    animation: none;
-    opacity: 1;
-    top: 25px;
-    left: 20px;
-    transform: scale(0.36667);
-  }
-
-  @media (min-width: 768px) {
-    .threshold-lockup-mark[data-stage="toCorner"],
-    .threshold-lockup-mark[data-stage="settle"],
-    .threshold-lockup-mark[data-stage="reveal"] {
-      top: 28.75px;
-      left: 40px;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .threshold-lockup-mark[data-stage="toCorner"],
-    .threshold-lockup-mark[data-stage="settle"],
-    .threshold-lockup-mark[data-stage="reveal"] {
-      left: 64px;
-    }
-  }
-
-  .threshold-wordmark {
-    display: inline-flex;
-    align-items: baseline;
-    font-size: 3.75rem;
-    line-height: 1;
-    white-space: nowrap;
-  }
-
-  .threshold-as {
-    display: inline-block;
-    font-family: var(--font-sans);
-    font-weight: 600;
-    opacity: 0;
-    letter-spacing: 0.4em;
-    transform: translateY(3px);
-    animation: threshold-as-in 0.6s var(--ease-out-quint) 0.05s forwards;
-  }
-
-  .threshold-portal-mark {
-    display: inline-block;
-    vertical-align: baseline;
-    height: 0.72em;
-    width: auto;
-    margin-left: 0.06em;
-    overflow: visible;
-  }
-
-  .threshold-portal-outline {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: threshold-draw 0.5s var(--ease-out-quint) 0.05s forwards;
-  }
-
-  .threshold-portal-fill {
-    fill: var(--color-gold);
-    opacity: 0;
-    animation: threshold-fade-in 0.35s var(--ease-out-quint) 0.45s forwards;
-  }
-
-  .threshold-lockup-name {
-    position: fixed;
-    top: calc(50% + 1.3rem);
-    left: 50%;
-    transform: translate(-50%, 0);
-    font-family: var(--font-mono);
-    font-size: 0.625rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    color: var(--color-paper);
-    opacity: 0;
-    z-index: 2;
-    animation: threshold-name-enter 0.5s var(--ease-out-quint) 0.55s forwards;
-    transition:
-      opacity 0.3s var(--ease-out-quint),
-      transform 0.35s var(--ease-out-quint),
-      color 0.3s var(--ease-out-quint);
-  }
-
-  .threshold-lockup-name[data-stage="toCorner"] {
-    /* Cancel the forwards-filled intro animation — otherwise it keeps
-       winning the cascade over opacity/transform forever and this rule
-       is silently ignored. */
-    animation: none;
-    opacity: 0;
-    transition: opacity 0.2s var(--ease-out-quint);
-  }
-
-  /* Corner position matches the real header name exactly (measured: the
-     logo's own rendered width + its gap-3 to the name, at each breakpoint),
-     so the handoff at idle is an invisible swap rather than a jump. */
-  .threshold-lockup-name[data-stage="settle"],
-  .threshold-lockup-name[data-stage="reveal"] {
-    animation: none;
-    top: 32.5px;
-    left: 78.5px;
-    transform: translate(0, 0);
-    opacity: 0.7;
-  }
-
-  @media (min-width: 768px) {
-    .threshold-lockup-name[data-stage="settle"],
-    .threshold-lockup-name[data-stage="reveal"] {
-      top: 36.25px;
-      left: 98.5px;
-    }
-  }
-
-  @media (min-width: 1280px) {
-    .threshold-lockup-name[data-stage="settle"],
-    .threshold-lockup-name[data-stage="reveal"] {
-      left: 122.5px;
-    }
-  }
-
-  .threshold-underline {
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    display: block;
-    overflow: hidden;
-    margin-top: 0.7em;
-    margin-left: -50vw;
-    height: 2px;
-    width: 100vw;
-    border-radius: 2px;
-    transform: scaleX(0);
-    transform-origin: center;
-    background: var(--color-gold);
-    box-shadow: 0 0 10px rgba(211, 168, 59, 0.4);
-    opacity: 1;
-    animation:
-      threshold-underline-draw 0.5s var(--ease-out-quint) 0.55s forwards,
-      threshold-underline-close 0.3s var(--ease-in-quint) 1.05s forwards;
-    transition: opacity 0.25s var(--ease-out-quint);
-  }
-
-  .threshold-lockup-mark[data-stage="settle"] .threshold-underline,
-  .threshold-lockup-mark[data-stage="reveal"] .threshold-underline {
-    opacity: 0;
-  }
-
-  .threshold-underline::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    width: 40%;
-    background-image: linear-gradient(
-      90deg,
-      transparent,
-      #bff0ff,
-      transparent
-    );
-    transform: translateX(-120%);
-    animation: threshold-underline-sweep 1.1s ease-in-out 1.05s infinite;
-  }
-
-  @keyframes threshold-draw {
-    from {
-      stroke-dashoffset: 1;
-    }
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-
-  @keyframes threshold-glow-pulse {
-    0%,
-    100% {
-      transform: scale(0.9);
-      opacity: 0.55;
-    }
-    50% {
-      transform: scale(1.05);
-      opacity: 1;
-    }
-  }
-
-  @keyframes threshold-mark-enter {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -100%) scale(0.94);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, -100%) scale(1);
-    }
-  }
-
-  @keyframes threshold-as-in {
-    from {
-      opacity: 0;
-      letter-spacing: 0.4em;
-      transform: translateY(3px);
-    }
-    to {
-      opacity: 1;
-      letter-spacing: -0.035em;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes threshold-fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes threshold-name-enter {
-    from {
-      opacity: 0;
-      transform: translate(-50%, 3px);
-    }
-    to {
-      opacity: 0.7;
-      transform: translate(-50%, 0);
-    }
-  }
-
-  @keyframes threshold-underline-draw {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
-    }
-  }
-
-  @keyframes threshold-underline-close {
-    from {
-      transform: scaleX(1);
-    }
-    to {
-      transform: scaleX(0);
-    }
-  }
-
-  @keyframes threshold-underline-sweep {
-    from {
-      transform: translateX(-120%);
-    }
-    to {
-      transform: translateX(220%);
-    }
+  /* !important: the name's opacity-70 utility sits in a later layer. */
+  html[data-intro-name] [data-logo-name] {
+    opacity: 0 !important;
+    transition: none;
   }
 
   @media (prefers-reduced-motion: reduce) {

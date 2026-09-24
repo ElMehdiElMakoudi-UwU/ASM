@@ -74,6 +74,8 @@ export function SiteHeader({
           href={`/${locale}`}
           className="group flex items-baseline"
           aria-label={`${site.fullName} — ${dict.common.backHome[locale]}`}
+          // Replays the full splash instead of the page-transition curtain.
+          data-no-transition
           onClick={() => {
             // From another page, clicking the logo replays the full
             // threshold splash (SiteLoader listens for this) instead of
@@ -89,6 +91,7 @@ export function SiteHeader({
           <span data-logo-content className="flex items-baseline gap-3">
             <Logo height={22} onDark={overlay} />
             <span
+              data-logo-name
               className="hidden text-[0.625rem] uppercase tracking-[0.22em] opacity-70 sm:inline"
               style={{ fontFamily: "var(--font-mono)" }}
             >

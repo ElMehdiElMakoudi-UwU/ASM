@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Frame } from "@/components/frame";
+import { ManifestoBuilding, PortalReveal, ThresholdPass } from "@/components/form-scenes";
 import { Reveal } from "@/components/reveal";
 import { dict, services } from "@/content/dictionary";
 import { categoryLabels } from "@/content/projects";
@@ -81,9 +82,13 @@ export default async function HomePage({
       {/* ---- Approach ------------------------------------------------ */}
       <section id="approach" className="shell py-24 md:py-36">
         <div className="grid gap-10 md:grid-cols-12">
-          <Reveal className="md:col-span-3">
-            <p className="label">{h.manifestoLabel[locale]}</p>
-          </Reveal>
+          <div className="md:col-span-3">
+            <Reveal>
+              <p className="label">{h.manifestoLabel[locale]}</p>
+            </Reveal>
+            {/* The mark's forms, building a house as you read. */}
+            <ManifestoBuilding className="mt-14 hidden w-full max-w-[13rem] md:block" />
+          </div>
           <Reveal className="md:col-span-9" delay={80}>
             <p className="display display-md max-w-[22ch]">{h.manifesto[locale][0]}</p>
             <p className="mt-10 max-w-[58ch] text-[1.0625rem] leading-relaxed text-graphite">
@@ -178,8 +183,8 @@ export default async function HomePage({
         </div>
       </section>
 
-      {/* ---- Enquiry ------------------------------------------------- */}
-      <section data-surface="dark" className="bg-ink text-paper">
+      {/* ---- Enquiry: through the portal ------------------------------ */}
+      <ThresholdPass>
         <div className="shell flex flex-col gap-10 py-24 md:flex-row md:items-end md:justify-between md:py-32">
           <div>
             <h2 className="display display-lg max-w-[16ch]">{h.ctaTitle[locale]}</h2>
@@ -192,7 +197,7 @@ export default async function HomePage({
             <span aria-hidden="true">→</span>
           </Link>
         </div>
-      </section>
+      </ThresholdPass>
     </>
   );
 }
@@ -212,14 +217,17 @@ function ProjectTile({
 }) {
   return (
     <Link href={`/${locale}/projects/${project.slug}`} className="group block">
-      <Frame
-        src={project.cover}
-        alt={project.title}
-        seed={project.slug}
-        className={ratio}
-        imageClassName="transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
-        sizes={sizes}
-      />
+      {/* Seen through the portal's opening, widening as it scrolls up. */}
+      <PortalReveal>
+        <Frame
+          src={project.cover}
+          alt={project.title}
+          seed={project.slug}
+          className={ratio}
+          imageClassName="transition-transform duration-[1200ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+          sizes={sizes}
+        />
+      </PortalReveal>
       <div
         className={`mt-5 flex items-baseline gap-4 border-t border-rule pt-4 ${
           wideMeta ? "md:gap-10" : ""

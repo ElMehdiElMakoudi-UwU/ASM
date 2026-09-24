@@ -107,10 +107,25 @@ single file at `DATABASE_PATH`.
 
 ## The logo
 
-The header and footer currently draw a **stand-in** wordmark: "AS" set in the
-grotesque, followed by the portal — the M of the mark. The portal is exact
-(three rectangles); the letterforms are an approximation, because the original
-typeface is not known here.
+The mark is drawn from three geometric forms, defined once in
+`components/asm-mark.tsx`: the **roof** (A, with its crossbar as a separate
+gold piece), the **stair** (a squared S) and the **portal** (M: two posts and a
+lintel, which is exact). Every animation on the site moves these same paths
+(GSAP), so they read as the same three objects travelling with the visitor:
+
+- `site-loader.tsx` — the splash: the forms assemble into the mark, which
+  flies into the header.
+- `page-transition.tsx` — between pages, an ink curtain in which the forms
+  lock into the mark, then scatter as the next page rises.
+- `form-scenes.tsx` — the scroll scenes: the house built beside the home
+  manifesto and, stage by stage, beside the commission process; forms dropping
+  onto each service and contact detail; the lockup splitting into the studio's
+  three rules; every project image opening through the portal's doorway;
+  walking through the portal into each dark call-to-action; the forms landing
+  in the footer; and the fallen house on the 404.
+
+If the real artwork differs, adjust the paths in `asm-mark.tsx` and every
+animation follows.
 
 To use the real mark, export two SVGs with transparent backgrounds and drop
 them into `public/`:
